@@ -1,0 +1,31 @@
+// Copyright 2022 The Fuchsia Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+{
+    include: [
+        // Enable system logging.
+        "syslog/client.shard.cml",
+    ],
+    program: {
+        data: "data/timestamp-server-flutter",
+        runner: "flutter_jit_runner",
+    },
+    capabilities: [
+        {
+            protocol: [
+                // A Flutter app starts running only after it is asked for its View.
+                "fuchsia.ui.app.ViewProvider",
+                "flutter.example.echo.Echo",
+            ],
+        },
+    ],
+    expose: [
+        {
+            protocol: [
+                "fuchsia.ui.app.ViewProvider",
+                "flutter.example.echo.Echo",
+            ],
+            from: "self",
+        },
+    ],
+}

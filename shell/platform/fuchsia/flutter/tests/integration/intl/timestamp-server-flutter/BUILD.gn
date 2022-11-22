@@ -1,0 +1,62 @@
+# Copyright 2020 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
+import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+
+# uses the flutter runner. The flutter runner is using
+# exactly the same mechanism as dart, but it is a different runner binary
+# nevertheless.  So we should test both.
+
+dart_library("lib-flutter") {
+  package_name = "timestamp-server-flutter"
+  null_safe = true
+  sources = [ "main.dart" ]
+  deps = [
+    # "//sdk/dart/fidl",
+    # "//sdk/dart/fuchsia",
+    # "//sdk/dart/fuchsia_logger",
+    # "//sdk/dart/fuchsia_services",
+    # "//sdk/dart/zircon",
+    # "//src/testing/fidl:placeholders_dart",
+    # "//third_party/dart-pkg/pub/intl",
+    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
+    "//flutter/tools/fuchsia/dart:fidl",
+    "//flutter/tools/fuchsia/dart:fuchsia",
+    "//flutter/tools/fuchsia/dart:fuchsia_logger",
+    "//flutter/tools/fuchsia/dart:fuchsia_services",
+    "//flutter/tools/fuchsia/dart:zircon",
+
+    # "//third_party/dart/third_party/pkg/intl"
+  ]
+}
+
+flutter_component("timestamp-server-flutter-component") {
+  testonly = true
+  main_package = "timestamp-server-flutter"
+  component_name = "timestamp-server-flutter"
+  manifest = rebase_path("meta/timestamp-server-flutter.cml")
+  main_dart = "main.dart"
+
+  deps = [
+    ":lib-flutter",
+    # "//src/intl:icudtl_root",
+  ]
+}
+
+fuchsia_package("package") {
+  testonly = true
+  package_name = "timestamp-server-flutter"
+
+  deps = [
+    ":timestamp-server-flutter-component",
+    # "OOT" copy of the runner used by tests, to avoid conflicting with the
+    # runners in the base fuchsia image.
+    # TODO(fxbug.dev/106575): Fix this with subpackages.
+    # "//flutter/shell/platform/fuchsia/dart_runner:oot_dart_jit_runner",
+  ]
+}

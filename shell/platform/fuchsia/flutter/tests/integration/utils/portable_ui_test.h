@@ -17,6 +17,8 @@
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 #include <zircon/status.h>
 
+#include <flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/flutter/example/echo/cpp/fidl.h>
+
 #include <optional>
 #include <vector>
 
@@ -36,6 +38,9 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   static constexpr auto kTestUIStack = "ui";
   static constexpr auto kTestUIStackRef =
       component_testing::ChildRef{kTestUIStack};
+  static constexpr auto kTestUIStackUrl =
+      "fuchsia-pkg://fuchsia.com/gfx-root-presenter-test-ui-stack#meta/"
+      "test-ui-stack.cm";
   static constexpr auto kFlutterJitRunner = "flutter_jit_runner";
   static constexpr auto kFlutterJitRunnerRef =
       component_testing::ChildRef{kFlutterJitRunner};
@@ -45,6 +50,8 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
   void SetUp();
+
+  void LaunchEcho();
 
   // Attaches a client view to the scene, and waits for it to render.
   void LaunchClient();
@@ -105,7 +112,7 @@ class PortableUITest : public ::loop_fixture::RealLoop {
 
   // Returns the test-specific test-ui-stack component url to use.
   // Usually overriden to return a value from gtest GetParam()
-  virtual std::string GetTestUIStackUrl() = 0;
+  // virtual std::string GetTestUIStackUrl() = 0;
 
   // Helper method to watch watch for view geometry updates.
   void WatchViewGeometry();
@@ -119,6 +126,8 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   fuchsia::ui::test::input::MousePtr fake_mouse_;
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
+
+  //  flutter::example::echo::EchoEchoStringRequestPtr echo_;
 
   component_testing::RealmBuilder realm_builder_ =
       component_testing::RealmBuilder::Create();

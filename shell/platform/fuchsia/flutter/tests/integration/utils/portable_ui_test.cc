@@ -11,6 +11,8 @@
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 
+#include <flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/flutter/example/echo/cpp/fidl.h>
+
 #include "check_view.h"
 #include "flutter/fml/logging.h"
 
@@ -65,7 +67,8 @@ void PortableUITest::SetUpRealmBase() {
   realm_builder_.ReplaceRealmDecl(std::move(realm_decl));
 
   // Add test UI stack component.
-  realm_builder_.AddChild(kTestUIStack, GetTestUIStackUrl());
+  // realm_builder_.AddChild(kTestUIStack, GetTestUIStackUrl());
+  realm_builder_.AddChild(kTestUIStack, kTestUIStackUrl);
 
   // // Route base system services to flutter and the test UI stack.
   realm_builder_.AddRoute(Route{
@@ -132,6 +135,43 @@ void PortableUITest::WatchViewGeometry() {
 bool PortableUITest::HasViewConnected(zx_koid_t view_ref_koid) {
   return last_view_tree_snapshot_.has_value() &&
          CheckViewExistsInSnapshot(*last_view_tree_snapshot_, view_ref_koid);
+}
+
+void PortableUITest::LaunchEcho() {
+  scene_provider_ = realm_->Connect<fuchsia::ui::test::scene::Controller>();
+  scene_provider_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from test scene provider: "
+                   << &zx_status_get_string;
+  });
+
+  fuchsia::ui::test::scene::ControllerAttachClientViewRequest request;
+  request.set_view_provider(realm_->Connect<fuchsia::ui::app::ViewProvider>());
+  scene_provider_->RegisterViewTreeWatcher(view_tree_watcher_.NewRequest(),
+                                           []() {});
+  scene_provider_->AttachClientView(
+      std::move(request), [this](auto client_view_ref_koid) {
+        client_root_view_ref_koid_ = client_view_ref_koid;
+      });
+
+  FML_LOG(INFO) << "Waiting for client view ref koid";
+  RunLoopUntil([this] { return client_root_view_ref_koid_.has_value(); });
+
+  WatchViewGeometry();
+
+  FML_LOG(INFO) << "Waiting for client view to connect";
+
+  // Wait for the client view to get attached to the view tree.
+  RunLoopUntil(
+      [this] { return HasViewConnected(*client_root_view_ref_koid_); });
+  FML_LOG(INFO) << "Client view has rendered";
+
+  // auto echo_ = realm_->Connect<flutter::example::echo::Echo>();
+  // FML_LOG(INFO) << "Connected to echo";
+  // echo_->EchoString("hello", []() {});
+  // auto echo_ = realm_->ConnectSync<flutter::example::echo::Echo>();
+  // fidl::StringPtr * response;
+  // // echo_->EchoString("hello", []() {});
+  // echo_->EchoString("hello", response);
 }
 
 void PortableUITest::LaunchClient() {

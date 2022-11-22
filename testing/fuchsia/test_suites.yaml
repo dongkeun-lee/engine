@@ -59,3 +59,8 @@
     - mouse-input-test-0.far
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/timezone-flutter-test#meta/timezone-flutter-test.cm
+  packages:
+    - timezone-flutter-test-0.far
+    - oot_flutter_jit_runner-0.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/intl/timestamp-server-flutter/timestamp-server-flutter/timestamp-server-flutter.far

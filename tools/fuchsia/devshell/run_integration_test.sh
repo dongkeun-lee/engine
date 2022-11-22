@@ -65,6 +65,9 @@ case $test_name in
   mouse-input)
     test_packages=("mouse-input-test-0.far" "mouse-input-view.far")
     ;;
+  intl)
+    test_packages=("timezone-flutter-test-0.far" "timestamp-server-flutter.far")
+    ;;
   *)
     engine-error "Unknown test name $test_name. You may need to add it to $0"
     exit 1
@@ -211,7 +214,7 @@ do
 done
 
 test_package_name_for_url="$(echo "${test_packages[0]}" | sed "s/\-0.far//")"
-test_url="fuchsia-pkg://fuchsia.com/${test_package_name_for_url}/0#meta/${test_package_name_for_url}.cm"
+test_url="fuchsia-pkg://fuchsia.com/${test_package_name_for_url}#meta/${test_package_name_for_url}.cm"
 engine-info "Running the test: $test_url"
 "$jiri_bin"/ffx test run $test_url
 

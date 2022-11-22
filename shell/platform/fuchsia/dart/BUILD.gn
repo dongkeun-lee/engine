@@ -151,7 +151,7 @@ dart_library("collection") {
   package_root = "//third_party/dart/third_party/pkg/collection"
   package_name = "collection"
 
-  language_version = "2.12"
+  language_version = "2.17"
 
   deps = []
 
@@ -162,6 +162,7 @@ dart_library("collection") {
     "iterable_zip.dart",
     "priority_queue.dart",
     "src/algorithms.dart",
+    "src/boollist.dart",
     "src/canonicalized_map.dart",
     "src/combined_wrappers/combined_iterable.dart",
     "src/combined_wrappers/combined_iterator.dart",
