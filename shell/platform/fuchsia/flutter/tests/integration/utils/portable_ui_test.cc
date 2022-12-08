@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <typeinfo>
 #include "portable_ui_test.h"
 
 #include <fuchsia/logger/cpp/fidl.h>
@@ -137,41 +138,16 @@ bool PortableUITest::HasViewConnected(zx_koid_t view_ref_koid) {
          CheckViewExistsInSnapshot(*last_view_tree_snapshot_, view_ref_koid);
 }
 
-void PortableUITest::LaunchEcho() {
-  scene_provider_ = realm_->Connect<fuchsia::ui::test::scene::Controller>();
-  scene_provider_.set_error_handler([](auto) {
-    FML_LOG(ERROR) << "Error from test scene provider: "
-                   << &zx_status_get_string;
+void PortableUITest::CallEcho() {
+  auto echo_ = realm_->Connect<flutter::example::echo::Echo>();
+  echo_->EchoString("time", [this](fidl::StringPtr from_timestamp_server_flutter) {
+    dart_time = from_timestamp_server_flutter;
+    QuitLoop();
   });
 
-  fuchsia::ui::test::scene::ControllerAttachClientViewRequest request;
-  request.set_view_provider(realm_->Connect<fuchsia::ui::app::ViewProvider>());
-  scene_provider_->RegisterViewTreeWatcher(view_tree_watcher_.NewRequest(),
-                                           []() {});
-  scene_provider_->AttachClientView(
-      std::move(request), [this](auto client_view_ref_koid) {
-        client_root_view_ref_koid_ = client_view_ref_koid;
-      });
-
-  FML_LOG(INFO) << "Waiting for client view ref koid";
-  RunLoopUntil([this] { return client_root_view_ref_koid_.has_value(); });
-
-  WatchViewGeometry();
-
-  FML_LOG(INFO) << "Waiting for client view to connect";
-
-  // Wait for the client view to get attached to the view tree.
-  RunLoopUntil(
-      [this] { return HasViewConnected(*client_root_view_ref_koid_); });
-  FML_LOG(INFO) << "Client view has rendered";
-
-  // auto echo_ = realm_->Connect<flutter::example::echo::Echo>();
-  // FML_LOG(INFO) << "Connected to echo";
-  // echo_->EchoString("hello", []() {});
-  // auto echo_ = realm_->ConnectSync<flutter::example::echo::Echo>();
-  // fidl::StringPtr * response;
-  // // echo_->EchoString("hello", []() {});
-  // echo_->EchoString("hello", response);
+  RunLoopUntil([this] { return dart_time.has_value(); });
+  FML_LOG(INFO) << "timestamp_server_flutter echoed back.";
+  FML_LOG(INFO) << "dart_time: " << dart_time;
 }
 
 void PortableUITest::LaunchClient() {

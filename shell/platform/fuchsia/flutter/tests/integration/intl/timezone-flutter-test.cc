@@ -19,11 +19,17 @@
 
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
-
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/testing/cpp/real_loop.h>
 #include <lib/async/cpp/executor.h>
 #include <lib/async/cpp/task.h>
+
+#include <third_party/icu/source/i18n/unicode/ucal.h>
+#include <third_party/icu/source/common/unicode/uloc.h>
+#include <third_party/icu/source/i18n/unicode/udat.h>
+#include <third_party/icu/source/i18n/unicode/datefmt.h>
+#include <third_party/icu/source/common/unicode/unistr.h>
+#include <third_party/icu/source/common/unicode/ustring.h>
 
 #include <gtest/gtest.h>
 #include <string>
@@ -32,9 +38,12 @@
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/portable_ui_test.h"
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/timezone_test_setup.h"
 
+
 namespace timezone_flutter_test::testing {
 namespace {
 
+// using namespace icu;
+using namespace std;
 // Types imported for the realm_builder library.
 using component_testing::ChildRef;
 using component_testing::ConfigValue;
@@ -64,10 +73,6 @@ constexpr auto kTimeStampServerFlutterUrl =
 
 class TimezoneTestBase : public PortableUITest, public ::testing::Test {
  protected:
-  // ~TimezoneTestBase() override {
-  //   FML_CHECK(touch_injection_request_count() > 0)
-  //       << "Injection expected but didn't happen.";
-  // }
   void SetUp() override {
     PortableUITest::SetUp();
     // Post a "just in case" quit task, if the test hangs.
@@ -114,11 +119,47 @@ class TimezoneFlutterTest : public TimezoneTestBase {
               .source = kTimeStampServerFlutterRef,
               .targets = {ParentRef()}});
   }
+ public:
+  void FormatterForTimezone() {
+    
+  }
 };
 
 TEST_F(TimezoneFlutterTest, TimezoneFlutter) {
   FML_LOG(INFO) << "Calling LaunchClient()";
-  LaunchEcho();
+  LaunchClient();
+  CallEcho();
+
+  UDate now = ucal_getNow();
+  FML_LOG(INFO) << "now: " << now;
+
+  UErrorCode status = U_ZERO_ERROR;
+  UChar *myString;
+  int32_t myStrlen = 0;
+
+  // UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, NULL, NULL, 0, NULL, 0, &status);
+  // UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, "en_US", NULL, 0, NULL, 0, &status);
+  UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, NULL, NULL, -1, NULL, -1, &status);
+  FML_LOG(INFO) << "after udat_open status: " << status;
+  myStrlen = udat_format(dfmt, now, NULL, myStrlen, NULL, &status);
+  if (status==U_BUFFER_OVERFLOW_ERROR){
+      FML_LOG(INFO) << "status==U_BUFFER_OVERFLOW_ERROR";
+      status=U_ZERO_ERROR;
+      myString=(UChar*)malloc(sizeof(UChar) * (myStrlen+1) );
+      udat_format(dfmt, now, myString, myStrlen+1, NULL, &status);
+  }
+  FML_LOG(INFO) << "status: " << status;
+  FML_LOG(INFO) << "myStrlen: " << myStrlen;
+  // FML_LOG(INFO) << "date format: " << u_austrcpy(buffer, myString);
+
+
+  // icu_71::DateFormat* df = icu_71::DateFormat::createDateInstance();
+  // icu_71::UnicodeString myString;
+  // FML_LOG(INFO) << "failed calling format";
+  // myString = df->format(now, myString);
+  // FML_LOG(INFO) << "failed after format";
+  // myString.toUTF8String(converted);
+  // FML_LOG(INFO) << "myString: " << converted;
 }
 
 }  // end namespace

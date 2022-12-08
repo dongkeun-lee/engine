@@ -49,9 +49,12 @@ class PortableUITest : public ::loop_fixture::RealLoop {
       "flutter_jit_runner.cm";
   static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
+  fidl::StringPtr dart_time;
+
   void SetUp();
 
-  void LaunchEcho();
+  // Calls EchoString from timestamp-server-flutter
+  void CallEcho();
 
   // Attaches a client view to the scene, and waits for it to render.
   void LaunchClient();
