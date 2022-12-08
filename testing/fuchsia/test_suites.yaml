@@ -70,3 +70,8 @@
     - timezone-flutter-test-0.far
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/intl/timestamp-server-flutter/timestamp-server-flutter/timestamp-server-flutter.far
+- test_command: test run fuchsia-pkg://fuchsia.com/text-input-test#meta/text-input-test.cm
+  packages:
+    - text-input-test-0.far
+    - oot_flutter_jit_runner-0.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/text-input/text-input-view/text-input-view/text-input-view.far
