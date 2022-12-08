@@ -119,10 +119,10 @@ class TimezoneFlutterTest : public TimezoneTestBase {
               .source = kTimeStampServerFlutterRef,
               .targets = {ParentRef()}});
   }
- public:
-  void FormatterForTimezone() {
+//  public:
+//   void FormatterForTimezone() {
     
-  }
+//   }
 };
 
 TEST_F(TimezoneFlutterTest, TimezoneFlutter) {

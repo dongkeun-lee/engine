@@ -140,10 +140,11 @@ bool PortableUITest::HasViewConnected(zx_koid_t view_ref_koid) {
 
 void PortableUITest::CallEcho() {
   auto echo_ = realm_->Connect<flutter::example::echo::Echo>();
-  echo_->EchoString("time", [this](fidl::StringPtr from_timestamp_server_flutter) {
-    dart_time = from_timestamp_server_flutter;
-    QuitLoop();
-  });
+  echo_->EchoString("time",
+                    [this](fidl::StringPtr from_timestamp_server_flutter) {
+                      dart_time = from_timestamp_server_flutter;
+                      QuitLoop();
+                    });
 
   RunLoopUntil([this] { return dart_time.has_value(); });
   FML_LOG(INFO) << "timestamp_server_flutter echoed back.";
