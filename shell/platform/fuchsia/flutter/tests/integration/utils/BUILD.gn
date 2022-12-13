@@ -57,29 +57,8 @@ source_set("portable_ui_test") {
     "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
-    "$fuchsia_sdk_root/pkg:async-loop-testing",
-    "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
-    "//flutter/fml",
-    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
-  ]
-}
-
-source_set("timezone_test_setup") {
-  testonly = true
-  sources = [
-    "timezone_test_setup.cc",
-    "timezone_test_setup.h",
-  ]
-
-  deps = [
-    ":check_view",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
+    "$fuchsia_sdk_root/fidl:fuchsia.settings",
+    "$fuchsia_sdk_root/fidl:fuchsia.intl",
     "$fuchsia_sdk_root/pkg:async-loop-testing",
     "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
     "//flutter/fml",

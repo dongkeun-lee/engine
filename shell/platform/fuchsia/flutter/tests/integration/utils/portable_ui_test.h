@@ -12,6 +12,10 @@
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/ui/test/scene/cpp/fidl.h>
+
+#include <fuchsia/settings/cpp/fidl.h>
+#include <fuchsia/intl/cpp/fidl.h>
+
 #include <lib/async-loop/testing/cpp/real_loop.h>
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
@@ -50,8 +54,13 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
   fidl::StringPtr dart_time;
+  double dart_time_double;
+	// fuchsia::settings::Intl_Set_Result result;
 
   void SetUp();
+
+	// Sets a timezone using fidl::intl
+	void SetTimezone(const std::string& timezone);
 
   // Calls EchoString from timestamp-server-flutter
   void CallEcho();
@@ -137,7 +146,7 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
 
-  //  flutter::example::echo::EchoEchoStringRequestPtr echo_;
+  fuchsia::settings::IntlPtr intl_;
 
   component_testing::RealmBuilder realm_builder_ =
       component_testing::RealmBuilder::Create();

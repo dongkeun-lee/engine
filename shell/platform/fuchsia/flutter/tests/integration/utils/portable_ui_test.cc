@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <typeinfo>
 #include "portable_ui_test.h"
 
 #include <fuchsia/logger/cpp/fidl.h>
@@ -143,12 +142,28 @@ void PortableUITest::CallEcho() {
   echo_->EchoString("time",
                     [this](fidl::StringPtr from_timestamp_server_flutter) {
                       dart_time = from_timestamp_server_flutter;
-                      QuitLoop();
                     });
 
   RunLoopUntil([this] { return dart_time.has_value(); });
   FML_LOG(INFO) << "timestamp_server_flutter echoed back.";
-  FML_LOG(INFO) << "dart_time: " << dart_time;
+  FML_LOG(INFO) << "dart_time: " << dart_time.value();
+
+  dart_time_double = std::stod(dart_time.value());
+}
+
+void PortableUITest::SetTimezone(const std::string& timezone) {
+  FML_LOG(INFO) << "Setting timezone to " << timezone;
+  intl_ = realm_->Connect<fuchsia::settings::Intl>();
+  const fuchsia::intl::TimeZoneId timezone_id{
+      .id = timezone,
+  };
+
+  fuchsia::settings::IntlSettings new_setting;
+  new_setting.set_time_zone_id(timezone_id);
+
+  FML_LOG(INFO) << "new_setting.time_zone_id(): " << new_setting.time_zone_id().id;
+  
+  intl_->Set(std::move(new_setting), [](fuchsia::settings::Intl_Set_Result result) {});
 }
 
 void PortableUITest::LaunchClient() {

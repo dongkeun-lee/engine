@@ -17,19 +17,22 @@
 
 #include <flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/flutter/example/echo/cpp/fidl.h>
 
-#include <lib/sys/component/cpp/testing/realm_builder.h>
-#include <lib/sys/component/cpp/testing/realm_builder_types.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/testing/cpp/real_loop.h>
 #include <lib/async/cpp/executor.h>
 #include <lib/async/cpp/task.h>
+#include <lib/sys/component/cpp/testing/realm_builder.h>
+#include <lib/sys/component/cpp/testing/realm_builder_types.h>
 
-#include <third_party/icu/source/i18n/unicode/ucal.h>
 #include <third_party/icu/source/common/unicode/uloc.h>
-#include <third_party/icu/source/i18n/unicode/udat.h>
-#include <third_party/icu/source/i18n/unicode/datefmt.h>
 #include <third_party/icu/source/common/unicode/unistr.h>
 #include <third_party/icu/source/common/unicode/ustring.h>
+#include <third_party/icu/source/i18n/unicode/datefmt.h>
+#include <third_party/icu/source/i18n/unicode/ucal.h>
+#include <third_party/icu/source/i18n/unicode/udat.h>
+#include <third_party/icu/source/i18n/unicode/simpletz.h>
+#include <third_party/icu/source/i18n/unicode/smpdtfmt.h>
+#include <third_party/icu/source/i18n/unicode/gregocal.h>
 
 #include <gtest/gtest.h>
 #include <string>
@@ -38,11 +41,10 @@
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/portable_ui_test.h"
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/timezone_test_setup.h"
 
-
 namespace timezone_flutter_test::testing {
 namespace {
 
-// using namespace icu;
+using namespace icu;
 using namespace std;
 // Types imported for the realm_builder library.
 using component_testing::ChildRef;
@@ -64,6 +66,10 @@ using RealmBuilder = component_testing::RealmBuilder;
 // Max timeout in failure cases.
 // Set this as low as you can that still works across all test platforms.
 constexpr zx::duration kTimeout = zx::min(1);
+
+// use for converting milliseconds to hour.
+// Number comes from (1000 * 60 * 60)
+const int millisecondsToHour = 3600000;
 
 constexpr auto kTimeStampServerFlutter = "timestamp-server-flutter";
 constexpr auto kTimeStampServerFlutterRef = ChildRef{kTimeStampServerFlutter};
@@ -119,47 +125,34 @@ class TimezoneFlutterTest : public TimezoneTestBase {
               .source = kTimeStampServerFlutterRef,
               .targets = {ParentRef()}});
   }
-//  public:
-//   void FormatterForTimezone() {
-    
-//   }
+
+ public:
+  int ConvertMillisecondsToHour(double milliseconds) {
+    FML_LOG(INFO) << "converting " << milliseconds << "to hours";
+    return milliseconds / millisecondsToHour;
+  }
 };
 
 TEST_F(TimezoneFlutterTest, TimezoneFlutter) {
   FML_LOG(INFO) << "Calling LaunchClient()";
   LaunchClient();
+  SetTimezone("America/New_York");
   CallEcho();
 
   UDate now = ucal_getNow();
-  FML_LOG(INFO) << "now: " << now;
+  // FML_LOG(INFO) << "now: " << now;
 
-  UErrorCode status = U_ZERO_ERROR;
-  UChar *myString;
-  int32_t myStrlen = 0;
-
-  // UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, NULL, NULL, 0, NULL, 0, &status);
-  // UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, "en_US", NULL, 0, NULL, 0, &status);
-  UDateFormat* dfmt = udat_open(UDAT_DEFAULT, UDAT_DEFAULT, NULL, NULL, -1, NULL, -1, &status);
-  FML_LOG(INFO) << "after udat_open status: " << status;
-  myStrlen = udat_format(dfmt, now, NULL, myStrlen, NULL, &status);
-  if (status==U_BUFFER_OVERFLOW_ERROR){
-      FML_LOG(INFO) << "status==U_BUFFER_OVERFLOW_ERROR";
-      status=U_ZERO_ERROR;
-      myString=(UChar*)malloc(sizeof(UChar) * (myStrlen+1) );
-      udat_format(dfmt, now, myString, myStrlen+1, NULL, &status);
-  }
-  FML_LOG(INFO) << "status: " << status;
-  FML_LOG(INFO) << "myStrlen: " << myStrlen;
-  // FML_LOG(INFO) << "date format: " << u_austrcpy(buffer, myString);
+  cout.precision(14);
+  cout << "full now: " << fixed << (double) now << endl;
 
 
-  // icu_71::DateFormat* df = icu_71::DateFormat::createDateInstance();
-  // icu_71::UnicodeString myString;
-  // FML_LOG(INFO) << "failed calling format";
-  // myString = df->format(now, myString);
-  // FML_LOG(INFO) << "failed after format";
-  // myString.toUTF8String(converted);
-  // FML_LOG(INFO) << "myString: " << converted;
+  int dart_hour = ConvertMillisecondsToHour(dart_time_double);
+  int local_hour = ConvertMillisecondsToHour(now);
+
+  FML_LOG(INFO) << "dart_hour: " << dart_hour;
+  FML_LOG(INFO) << "local_hour: " << local_hour;
+  
+  ASSERT_EQ(dart_hour, local_hour);
 }
 
 }  // end namespace

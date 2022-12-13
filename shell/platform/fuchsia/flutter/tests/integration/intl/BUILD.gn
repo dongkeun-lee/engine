@@ -44,7 +44,6 @@ executable("timezone-flutter-test-bin") {
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
-    "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:timezone_test_setup",
     "//third_party/googletest:gtest",
     "//third_party/googletest:gtest_main",
     "//third_party/icu:icu",

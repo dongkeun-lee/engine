@@ -25,16 +25,16 @@ class _EchoImpl extends fidl_echo.Echo {
 
   @override
   Future<String?> echoString(String? value) async {
-    log.fine('Request: $value');
     final now = DateTime.now();
     final nowLocal = now.toLocal();
     log.info('Test time server thinks that local time is: $nowLocal '
         'and raw time is: $now (tz offset: ${nowLocal.timeZoneOffset}, '
         'seconds since Epoch: ${nowLocal.millisecondsSinceEpoch / 1000.0})');
     // Example: 2020-2-26-14, hour 14 of February 26.
-    final dateTime = await formatDate(nowLocal);
-    log.info('Test time server reporting time as: "$dateTime"');
-    return dateTime;
+    // final dateTime = await formatDate(nowLocal);
+    // log.info('Test time server reporting time as: "$dateTime"');
+    // return dateTime;
+    return nowLocal.millisecondsSinceEpoch.toString();
   }
 
   Future<String> formatDate(DateTime local) async {
